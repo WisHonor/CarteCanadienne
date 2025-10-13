@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 type Lang = 'fr' | 'en'
 
@@ -70,7 +71,7 @@ const messages = {
         gc: 'Government of Canada',
         svc: 'Accessible Card Service',
         langToggle: 'Français',
-        langToggleSr: '— Basculer vers le français',
+        langToggleSr: '— Switch to French',
 
         h1: 'Application — Step 1: Identification',
         bcHome: 'Home',
@@ -159,7 +160,9 @@ const initialData: FormData = {
 }
 
 export default function Demande() {
-    // Hydratation sûre : FR au SSR, puis on lit la préférence utilisateur
+    const router = useRouter()
+
+    // Hydration-safe language (like your home page)
     const [lang, setLang] = useState<Lang>('fr')
     const [mounted, setMounted] = useState(false)
     const t = <K extends keyof typeof messages['fr']>(k: K) => messages[lang][k]
@@ -216,14 +219,18 @@ export default function Demande() {
             requestAnimationFrame(() => errorSummaryRef.current?.focus())
             return
         }
-        // TODO: remplacer par ton submit réel (API/route)
-        console.log('Étape 1 — Données:', data)
-        alert(lang === 'fr' ? 'Étape 1 soumise (simulation).' : 'Step 1 submitted (demo).')
+
+        // Save step data before navigating (so Step 2 can preload it)
+        sessionStorage.setItem('demande-step1', JSON.stringify(data))
+        sessionStorage.setItem('demande-lang', lang)
+
+        // Navigate to Step 2
+        router.push('/demande/etape-2')
     }
 
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-white">
-            {/* En-tête visuel identique à l’accueil */}
+            {/* Header (same style as home) */}
             <header role="banner" className="bg-white shadow-sm border-b-4 border-blue-700">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between py-3 border-b border-slate-200">
@@ -239,7 +246,7 @@ export default function Demande() {
                             </div>
                         </div>
 
-                        {/* Bascule de langue (bouton, pas de lien) */}
+                        {/* Language toggle */}
                         <button
                             type="button"
                             onClick={toggleLang}
@@ -252,7 +259,7 @@ export default function Demande() {
                         </button>
                     </div>
 
-                    {/* Titre + fil d’Ariane (non-navigants) */}
+                    {/* Title + breadcrumb (non-navigating) */}
                     <div className="py-8">
                         <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight">{t('h1')}</h1>
                         <nav aria-label={lang === 'fr' ? "Fil d'Ariane" : 'Breadcrumb'} className="mt-4">
@@ -268,7 +275,7 @@ export default function Demande() {
                 </div>
             </header>
 
-            {/* Corps principal style “hero card” comme l’accueil */}
+            {/* Main content (hero card style) */}
             <main id="main" role="main" className="flex-1">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
                     <section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-8 sm:p-12 border border-blue-100">
@@ -276,7 +283,7 @@ export default function Demande() {
                             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">{t('heroTitle')}</h2>
                             <p className="text-lg text-slate-700 leading-relaxed mb-8">{t('heroDesc')}</p>
 
-                            {/* Résumé d’erreurs (bilingue) */}
+                            {/* Error summary */}
                             {Object.keys(errors).length > 0 && (
                                 <div
                                     ref={errorSummaryRef}
@@ -303,10 +310,10 @@ export default function Demande() {
                                 </div>
                             )}
 
-                            {/* Formulaire dans un panneau blanc à bord gauche bleu */}
+                            {/* Form panel */}
                             <div className="bg-white rounded-xl p-6 shadow-md border-l-4 border-blue-700">
                                 <form noValidate onSubmit={handleSubmit} className="space-y-8">
-                                    {/* Nom légal */}
+                                    {/* Legal name */}
                                     <fieldset className="space-y-4">
                                         <legend className="text-lg font-semibold text-slate-900">{t('legendName')}</legend>
                                         <div>
@@ -348,7 +355,7 @@ export default function Demande() {
                                         </div>
                                     </fieldset>
 
-                                    {/* Naissance */}
+                                    {/* DOB */}
                                     <fieldset className="space-y-4">
                                         <legend className="text-lg font-semibold text-slate-900">{t('legendDob')}</legend>
                                         <div>
@@ -373,7 +380,7 @@ export default function Demande() {
                                         </div>
                                     </fieldset>
 
-                                    {/* Coordonnées */}
+                                    {/* Contact */}
                                     <fieldset className="space-y-4">
                                         <legend className="text-lg font-semibold text-slate-900">{t('legendContact')}</legend>
                                         <div>
@@ -417,7 +424,7 @@ export default function Demande() {
                                         </div>
                                     </fieldset>
 
-                                    {/* Adresse postale */}
+                                    {/* Address */}
                                     <fieldset className="space-y-4">
                                         <legend className="text-lg font-semibold text-slate-900">{t('legendAddress')}</legend>
                                         <div>
@@ -514,7 +521,7 @@ export default function Demande() {
                                         </div>
                                     </fieldset>
 
-                                    {/* Actions (CTA style accueil) */}
+                                    {/* Actions */}
                                     <div className="flex items-center gap-4 pt-2">
                                         <button
                                             type="submit"
@@ -536,7 +543,7 @@ export default function Demande() {
                                 </form>
                             </div>
 
-                            {/* Bloc d’aide jaune (mêmes styles) */}
+                            {/* Help block (non-link buttons) */}
                             <section aria-labelledby="support-heading" className="bg-amber-50 rounded-2xl p-6 sm:p-8 border-2 border-amber-200 mt-8">
                                 <div className="flex items-start gap-4 mb-4">
                                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0" aria-hidden>ℹ️</div>
@@ -571,7 +578,7 @@ export default function Demande() {
                 </div>
             </main>
 
-            {/* Pied de page (sans liens réels) */}
+            {/* Footer (no real links) */}
             <footer role="contentinfo" className="bg-slate-900 text-slate-300 border-t-4 border-blue-700">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
