@@ -157,8 +157,19 @@ export default function AdminVerificationPage() {
         identity: false,
         medical: false,
     })
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
 
     const t = (key: keyof typeof translations.fr) => translations[lang][key]
+
+    // Check authentication
+    useEffect(() => {
+        const adminToken = sessionStorage.getItem('admin-token')
+        if (!adminToken) {
+            router.push('/admin/login')
+            return
+        }
+        setIsAuthenticated(true)
+    }, [router])
 
     useEffect(() => {
         const saved = (localStorage.getItem('lang') as Lang) || 'fr'
@@ -168,14 +179,27 @@ export default function AdminVerificationPage() {
     }, [])
 
     useEffect(() => {
-        if (mounted && applicationId) {
+        if (mounted && applicationId && isAuthenticated) {
             fetchApplication()
         }
-    }, [mounted, applicationId])
+    }, [mounted, applicationId, isAuthenticated])
 
     const fetchApplication = async () => {
         try {
-            const response = await fetch(`/api/admin/applications/${applicationId}`)
+            const token = sessionStorage.getItem('admin-token')
+            const response = await fetch(`/api/admin/applications/${applicationId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            })
+            
+            if (response.status === 401) {
+                sessionStorage.removeItem('admin-token')
+                sessionStorage.removeItem('admin-user')
+                router.push('/admin/login')
+                return
+            }
+            
             if (!response.ok) {
                 throw new Error('Failed to fetch application')
             }
@@ -221,9 +245,13 @@ export default function AdminVerificationPage() {
                 adminNotes: adminNotes.trim() || null,
             })
 
+            const token = sessionStorage.getItem('admin-token')
             const response = await fetch('/api/admin/verify', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify({
                     applicationId,
                     status,

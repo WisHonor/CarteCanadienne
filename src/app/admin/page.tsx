@@ -84,8 +84,19 @@ export default function AdminDashboardPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL')
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
 
     const t = (key: keyof typeof translations.fr) => translations[lang][key]
+
+    // Check authentication
+    useEffect(() => {
+        const adminToken = sessionStorage.getItem('admin-token')
+        if (!adminToken) {
+            router.push('/admin/login')
+            return
+        }
+        setIsAuthenticated(true)
+    }, [router])
 
     useEffect(() => {
         const saved = (localStorage.getItem('lang') as Lang) || 'fr'
@@ -95,10 +106,10 @@ export default function AdminDashboardPage() {
     }, [])
 
     useEffect(() => {
-        if (mounted) {
+        if (mounted && isAuthenticated) {
             fetchApplications()
         }
-    }, [mounted])
+    }, [mounted, isAuthenticated])
 
     useEffect(() => {
         if (filter === 'ALL') {
@@ -110,7 +121,21 @@ export default function AdminDashboardPage() {
 
     const fetchApplications = async () => {
         try {
-            const response = await fetch('/api/admin/applications')
+            const token = sessionStorage.getItem('admin-token')
+            const response = await fetch('/api/admin/applications', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            })
+            
+            if (response.status === 401) {
+                // Token invalid, redirect to login
+                sessionStorage.removeItem('admin-token')
+                sessionStorage.removeItem('admin-user')
+                router.push('/admin/login')
+                return
+            }
+            
             if (!response.ok) {
                 throw new Error('Failed to fetch applications')
             }
@@ -196,16 +221,33 @@ export default function AdminDashboardPage() {
                             </div>
                         </div>
 
-                        <button
-                            type="button"
-                            onClick={toggleLang}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border-2 border-slate-300 rounded-lg hover:bg-slate-50 hover:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all"
-                            aria-pressed={lang === 'en'}
-                        >
-                            <span className="text-lg" aria-hidden="true">{lang === 'fr' ? '🇬🇧' : '🇫🇷'}</span>
-                            {translations[lang].langToggle}
-                            <span className="sr-only">{translations[lang].langToggleSr}</span>
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <button
+                                type="button"
+                                onClick={toggleLang}
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border-2 border-slate-300 rounded-lg hover:bg-slate-50 hover:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all"
+                                aria-pressed={lang === 'en'}
+                            >
+                                <span className="text-lg" aria-hidden="true">{lang === 'fr' ? '🇬🇧' : '🇫🇷'}</span>
+                                {translations[lang].langToggle}
+                                <span className="sr-only">{translations[lang].langToggleSr}</span>
+                            </button>
+                            
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    sessionStorage.removeItem('admin-token')
+                                    sessionStorage.removeItem('admin-user')
+                                    router.push('/admin/login')
+                                }}
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition-all"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                {lang === 'fr' ? 'Déconnexion' : 'Logout'}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="py-8">

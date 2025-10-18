@@ -5,6 +5,17 @@ const prisma = new PrismaClient()
 
 export async function POST(req: NextRequest) {
     try {
+        // Check authentication
+        const authHeader = req.headers.get('authorization')
+        const token = authHeader?.replace('Bearer ', '')
+        
+        if (!token) {
+            return NextResponse.json(
+                { error: 'Unauthorized - Admin access required' },
+                { status: 401 }
+            )
+        }
+
         const body = await req.json()
         const { applicationId, status, adminNotes } = body
 

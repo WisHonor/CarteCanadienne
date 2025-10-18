@@ -1,13 +1,20 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@/generated/prisma'
 
 const prisma = new PrismaClient()
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
-        // TODO: Add authentication check here
-        // For now, anyone can access this endpoint
-        // In production, verify the user has admin role
+        // Check authentication
+        const authHeader = req.headers.get('authorization')
+        const token = authHeader?.replace('Bearer ', '')
+        
+        if (!token) {
+            return NextResponse.json(
+                { error: 'Unauthorized - Admin access required' },
+                { status: 401 }
+            )
+        }
 
         const applications = await prisma.application.findMany({
             include: {
