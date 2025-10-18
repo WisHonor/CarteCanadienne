@@ -47,12 +47,50 @@ export async function GET(req: NextRequest) {
             )
         }
 
+        // Fetch full application with user details
+        const fullApplication = await prisma.application.findUnique({
+            where: { id: application.id },
+            include: {
+                User_Application_userIdToUser: true,
+            },
+        })
+
+        if (!fullApplication || !fullApplication.User_Application_userIdToUser) {
+            return NextResponse.json(
+                { error: 'Application or user not found' },
+                { status: 404 }
+            )
+        }
+
+        const user = fullApplication.User_Application_userIdToUser
+
         return NextResponse.json({
-            id: application.id,
-            status: application.status,
-            createdAt: application.createdAt,
-            identityDocUrl: application.identityDocUrl,
-            medicalDocUrl: application.medicalDocUrl,
+            id: fullApplication.id,
+            status: fullApplication.status,
+            createdAt: fullApplication.createdAt,
+            updatedAt: fullApplication.updatedAt,
+            disabilities: JSON.parse(fullApplication.disabilities || '[]'),
+            services: JSON.parse(fullApplication.services || '[]'),
+            otherText: fullApplication.otherText,
+            details: fullApplication.details,
+            identityDocUrl: fullApplication.identityDocUrl,
+            medicalDocUrl: fullApplication.medicalDocUrl,
+            adminNotes: fullApplication.adminNotes,
+            verifiedAt: fullApplication.verifiedAt,
+            user: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                phone: user.phone,
+                dateOfBirth: user.dateOfBirth,
+                address: {
+                    line1: user.addressLine1,
+                    line2: user.addressLine2,
+                    city: user.city,
+                    province: user.province,
+                    postalCode: user.postalCode,
+                },
+            },
         })
     } catch (error) {
         console.error('Fetch application error:', error)

@@ -223,6 +223,7 @@ export default function Etape3() {
 
         const step1Data = sessionStorage.getItem('demande-step1')
         const step2Data = sessionStorage.getItem('demande-step2')
+        const editingApplicationId = sessionStorage.getItem('editing-application-id')
 
         if (!step1Data || !step2Data) {
             alert(t('errMissingData'))
@@ -238,6 +239,7 @@ export default function Etape3() {
                 step2: JSON.parse(step2Data),
                 identityDocUrl: identityUpload.s3Key, // Store S3 key, not the presigned URL
                 medicalDocUrl: medicalUpload.s3Key, // Store S3 key, not the presigned URL
+                applicationId: editingApplicationId || undefined, // Include if editing
             }
             
             console.log('Submitting application with data:', requestData)
@@ -252,9 +254,18 @@ export default function Etape3() {
                 const result = await response.json()
                 console.log('Application saved:', result)
                 
-                // Don't clear sessionStorage yet - verification-status needs it
-                // sessionStorage will be cleared after viewing the status
-                router.push(`/demande/verification-status?id=${result.applicationId}`)
+                // Clear editing flag if present
+                sessionStorage.removeItem('editing-application-id')
+                
+                // If editing, redirect to view page; otherwise to verification status
+                if (editingApplicationId) {
+                    const step1 = JSON.parse(step1Data!)
+                    router.push(`/application/view?email=${encodeURIComponent(step1.courriel)}`)
+                } else {
+                    // Don't clear sessionStorage yet - verification-status needs it
+                    // sessionStorage will be cleared after viewing the status
+                    router.push(`/demande/verification-status?id=${result.applicationId}`)
+                }
             } else {
                 // Get detailed error message from API
                 const errorData = await response.json()

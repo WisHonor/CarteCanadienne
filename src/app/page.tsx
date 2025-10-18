@@ -26,6 +26,9 @@ const messages = {
     needTime: "Environ 15-20 minutes pour remplir le formulaire",
     cta: "Commencer la demande",
     saveDraft: "Vous pourrez sauvegarder un brouillon et reprendre plus tard.",
+    alreadyApplied: "Vous avez déjà soumis une demande ?",
+    checkStatus: "Vérifier le statut de ma demande",
+    checkStatusDesc: "Consultez l'état de votre demande ou modifiez-la si nécessaire",
     why: "Pourquoi utiliser notre service en ligne ?",
     a11y: "100% Accessible",
     a11yDesc:
@@ -70,12 +73,15 @@ const messages = {
     heroTitle: "Get your Accessibility Card",
     heroDesc:
         "The Canadian Accessibility Card helps you access services and accommodations across the country. Our online form is accessible, secure, and easy to use.",
-    need: "What you’ll need:",
-    needId: "Valid ID (driver’s licence, passport)",
+    need: "What you'll need:",
+    needId: "Valid ID (driver's licence, passport)",
     needProof: "Proof of eligibility (medical certificate, disability attestation)",
     needTime: "About 15–20 minutes to complete the form",
     cta: "Start application",
     saveDraft: "You can save a draft and come back later.",
+    alreadyApplied: "Already submitted an application?",
+    checkStatus: "Check my application status",
+    checkStatusDesc: "View your application status or edit if needed",
     why: "Why use our online service?",
     a11y: "100% Accessible",
     a11yDesc:
@@ -256,6 +262,31 @@ export default function Home() {
                 </a>
 
                 <p className="mt-4 text-sm text-slate-600">{t('saveDraft')}</p>
+              </div>
+            </section>
+
+            {/* Check Status Section */}
+            <section className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-lg p-8 sm:p-10 mb-12 border-2 border-green-200">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0" aria-hidden="true">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">{t('alreadyApplied')}</h2>
+                  <p className="text-lg text-slate-700 mb-6">{t('checkStatusDesc')}</p>
+                  
+                  <a
+                      href="/application/check-status"
+                      className="inline-flex items-center justify-center min-h-[48px] px-8 py-4 text-lg font-semibold text-white bg-green-700 rounded-xl hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    {t('checkStatus')}
+                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                </div>
               </div>
             </section>
 
