@@ -45,13 +45,17 @@ const messages = {
         continue: 'Continuer',
         clear: 'Effacer',
 
-        supportTitle: 'Besoin d’aide ?',
+        supportTitle: 'Besoin d\'aide ?',
         supportDesc: 'Nous sommes là pour vous accompagner à chaque étape du processus.',
         supportPhone: 'Par téléphone',
         supportHours: 'Lundi au vendredi, 8h à 20h (HE)',
         supportOnline: 'Ressources en ligne',
-        supportHelp: 'Centre d’aide et FAQ',
+        supportHelp: 'Centre d\'aide et FAQ',
         supportPledge: 'Engagement en accessibilité',
+
+        // Edit mode
+        editModeTitle: 'Mode modification',
+        editModeDesc: 'Vous modifiez votre demande existante. Vous pouvez mettre à jour toutes vos informations.',
 
         // errors
         eFirst: 'Prénom requis.',
@@ -115,6 +119,10 @@ const messages = {
         supportHelp: 'Help centre & FAQ',
         supportPledge: 'Accessibility commitment',
 
+        // Edit mode
+        editModeTitle: 'Edit Mode',
+        editModeDesc: 'You are editing your existing application. You can update all your information.',
+
         // errors
         eFirst: 'First name is required.',
         eLast: 'Last name is required.',
@@ -174,6 +182,27 @@ export default function Demande() {
         setMounted(true)
     }, [])
 
+    // Load saved data from sessionStorage (for edit mode or returning to step 1)
+    useEffect(() => {
+        if (mounted) {
+            const savedStep1 = sessionStorage.getItem('demande-step1')
+            const editingId = sessionStorage.getItem('editing-application-id')
+            
+            if (editingId) {
+                setIsEditMode(true)
+            }
+            
+            if (savedStep1) {
+                try {
+                    const parsedData = JSON.parse(savedStep1)
+                    setData(parsedData)
+                } catch (err) {
+                    console.error('Failed to parse saved step 1 data:', err)
+                }
+            }
+        }
+    }, [mounted])
+
     const toggleLang = () => {
         setLang(prev => {
             const next = prev === 'fr' ? 'en' : 'fr'
@@ -185,6 +214,7 @@ export default function Demande() {
 
     const [data, setData] = useState<FormData>(initialData)
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [isEditMode, setIsEditMode] = useState(false)
     const errorSummaryRef = useRef<HTMLDivElement>(null)
 
     const onChange =
@@ -282,6 +312,23 @@ export default function Demande() {
                         <div className="max-w-3xl">
                             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">{t('heroTitle')}</h2>
                             <p className="text-lg text-slate-700 leading-relaxed mb-8">{t('heroDesc')}</p>
+
+                            {/* Edit Mode Banner */}
+                            {isEditMode && (
+                                <div className="mb-8 rounded-xl border-l-4 border-blue-600 bg-blue-50 p-6 shadow-md">
+                                    <div className="flex items-start gap-4">
+                                        <div className="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-bold text-blue-900 mb-1">{t('editModeTitle')}</h3>
+                                            <p className="text-sm text-blue-800">{t('editModeDesc')}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Error summary */}
                             {Object.keys(errors).length > 0 && (

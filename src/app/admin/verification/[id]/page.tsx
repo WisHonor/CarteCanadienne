@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import ConfirmModal from '@/components/ConfirmModal'
+import Toast from '@/components/Toast'
 
 type Lang = 'fr' | 'en'
 
@@ -48,6 +50,12 @@ const translations = {
         reject: 'Rejeter',
         confirmApprove: 'Êtes-vous sûr de vouloir approuver cette demande?',
         confirmReject: 'Êtes-vous sûr de vouloir rejeter cette demande?',
+        confirmApproveTitle: 'Confirmer l\'approbation',
+        confirmRejectTitle: 'Confirmer le rejet',
+        confirmApproveMessage: 'Cette action approuvera la demande et enverra un courriel de confirmation au demandeur. Voulez-vous continuer?',
+        confirmRejectMessage: 'Cette action rejettera la demande et enverra un courriel de notification au demandeur. Voulez-vous continuer?',
+        confirmButton: 'Confirmer',
+        cancelButton: 'Annuler',
         
         // Status
         statusPending: 'En attente',
@@ -101,6 +109,12 @@ const translations = {
         reject: 'Reject',
         confirmApprove: 'Are you sure you want to approve this application?',
         confirmReject: 'Are you sure you want to reject this application?',
+        confirmApproveTitle: 'Confirm Approval',
+        confirmRejectTitle: 'Confirm Rejection',
+        confirmApproveMessage: 'This action will approve the application and send a confirmation email to the applicant. Do you want to continue?',
+        confirmRejectMessage: 'This action will reject the application and send a notification email to the applicant. Do you want to continue?',
+        confirmButton: 'Confirm',
+        cancelButton: 'Cancel',
         
         // Status
         statusPending: 'Pending',
@@ -158,6 +172,22 @@ export default function AdminVerificationPage() {
         medical: false,
     })
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean
+        type: 'APPROVED' | 'REJECTED' | null
+    }>({
+        isOpen: false,
+        type: null,
+    })
+    const [toast, setToast] = useState<{
+        isOpen: boolean
+        message: string
+        type: 'success' | 'error' | 'info' | 'warning'
+    }>({
+        isOpen: false,
+        message: '',
+        type: 'info',
+    })
 
     const t = (key: keyof typeof translations.fr) => translations[lang][key]
 
@@ -227,16 +257,17 @@ export default function AdminVerificationPage() {
             window.open(data.url, '_blank')
         } catch (err) {
             console.error('Error viewing document:', err)
-            alert('Failed to open document. Please try again.')
+            setToast({
+                isOpen: true,
+                message: lang === 'fr' ? 'Échec de l\'ouverture du document. Veuillez réessayer.' : 'Failed to open document. Please try again.',
+                type: 'error',
+            })
         } finally {
             setViewingDoc(prev => ({ ...prev, [type]: false }))
         }
     }
 
     const handleVerify = async (status: 'APPROVED' | 'REJECTED') => {
-        const confirmMessage = status === 'APPROVED' ? t('confirmApprove') : t('confirmReject')
-        if (!confirm(confirmMessage)) return
-
         setSubmitting(true)
         try {
             console.log('Sending verification request:', {
@@ -267,13 +298,39 @@ export default function AdminVerificationPage() {
                 throw new Error(responseData.error || 'Failed to verify application')
             }
 
-            alert(status === 'APPROVED' ? t('successApproved') : t('successRejected'))
-            router.push('/admin')
+            setToast({
+                isOpen: true,
+                message: status === 'APPROVED' ? t('successApproved') : t('successRejected'),
+                type: 'success',
+            })
+            
+            // Redirect after showing success message
+            setTimeout(() => {
+                router.push('/admin')
+            }, 1500)
         } catch (err) {
             console.error('Error verifying application:', err)
-            alert(t('errorVerify') + ': ' + (err instanceof Error ? err.message : 'Unknown error'))
+            setToast({
+                isOpen: true,
+                message: t('errorVerify') + ': ' + (err instanceof Error ? err.message : 'Unknown error'),
+                type: 'error',
+            })
         } finally {
             setSubmitting(false)
+        }
+    }
+
+    const openConfirmModal = (type: 'APPROVED' | 'REJECTED') => {
+        setConfirmModal({ isOpen: true, type })
+    }
+
+    const closeConfirmModal = () => {
+        setConfirmModal({ isOpen: false, type: null })
+    }
+
+    const confirmVerify = () => {
+        if (confirmModal.type) {
+            handleVerify(confirmModal.type)
         }
     }
 
@@ -549,7 +606,7 @@ export default function AdminVerificationPage() {
 
                                             <div className="space-y-3">
                                                 <button
-                                                    onClick={() => handleVerify('APPROVED')}
+                                                    onClick={() => openConfirmModal('APPROVED')}
                                                     disabled={submitting}
                                                     className="w-full px-6 py-3.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors font-semibold text-lg shadow-sm flex items-center justify-center gap-2"
                                                 >
@@ -560,7 +617,7 @@ export default function AdminVerificationPage() {
                                                 </button>
 
                                                 <button
-                                                    onClick={() => handleVerify('REJECTED')}
+                                                    onClick={() => openConfirmModal('REJECTED')}
                                                     disabled={submitting}
                                                     className="w-full px-6 py-3.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors font-semibold text-lg shadow-sm flex items-center justify-center gap-2"
                                                 >
@@ -578,6 +635,26 @@ export default function AdminVerificationPage() {
                     )}
                 </div>
             </main>
+
+            {/* Confirmation Modal */}
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={closeConfirmModal}
+                onConfirm={confirmVerify}
+                title={confirmModal.type === 'APPROVED' ? t('confirmApproveTitle') : t('confirmRejectTitle')}
+                message={confirmModal.type === 'APPROVED' ? t('confirmApproveMessage') : t('confirmRejectMessage')}
+                confirmText={t('confirmButton')}
+                cancelText={t('cancelButton')}
+                type={confirmModal.type === 'APPROVED' ? 'approve' : 'reject'}
+            />
+
+            {/* Toast Notification */}
+            <Toast
+                isOpen={toast.isOpen}
+                onClose={() => setToast(prev => ({ ...prev, isOpen: false }))}
+                message={toast.message}
+                type={toast.type}
+            />
         </div>
     )
 }

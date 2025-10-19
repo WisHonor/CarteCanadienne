@@ -235,8 +235,8 @@ export default function ViewApplicationPage() {
         sessionStorage.setItem('demande-step2', JSON.stringify(step2Data))
         sessionStorage.setItem('editing-application-id', application!.id)
         
-        // Redirect to step 3 (document upload)
-        router.push('/demande/etape-3')
+        // Redirect to step 1 (beginning) so users can edit ALL information
+        router.push('/demande')
     }
 
     const toggleLang = () => {
