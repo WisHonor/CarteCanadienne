@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         // Check authentication
@@ -19,7 +19,7 @@ export async function GET(
             )
         }
 
-        const { id } = params
+        const { id } = await params
 
         const application = await prisma.application.findUnique({
             where: { id },
