@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@/generated/prisma'
+import { sendEmail, getApprovalEmailTemplate, getRejectionEmailTemplate } from '@/lib/email'
 
 const prisma = new PrismaClient()
 
@@ -35,9 +36,27 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        // TODO: Get the admin user ID from authentication
-        // For now, we'll leave verifiedById as null since we don't have auth yet
-        
+        // Get the application with user details for email
+        const application = await prisma.application.findUnique({
+            where: { id: applicationId },
+            include: {
+                User_Application_userIdToUser: {
+                    select: {
+                        email: true,
+                        firstName: true,
+                        lastName: true,
+                    },
+                },
+            },
+        })
+
+        if (!application) {
+            return NextResponse.json(
+                { error: 'Application not found' },
+                { status: 404 }
+            )
+        }
+
         // Update the application
         const updatedApplication = await prisma.application.update({
             where: { id: applicationId },
@@ -51,6 +70,47 @@ export async function POST(req: NextRequest) {
         })
 
         console.log('Application verified:', updatedApplication)
+
+        // Send email notification
+        try {
+            const user = application.User_Application_userIdToUser
+            const lang: 'fr' | 'en' = 'fr' // Default to French, could be stored in user preferences
+            
+            if (status === 'APPROVED') {
+                const emailTemplate = getApprovalEmailTemplate({
+                    firstName: user.firstName || '',
+                    lastName: user.lastName || '',
+                    lang,
+                })
+                
+                await sendEmail({
+                    to: user.email,
+                    subject: emailTemplate.subject,
+                    html: emailTemplate.html,
+                })
+                
+                console.log('Approval email sent to:', user.email)
+            } else if (status === 'REJECTED') {
+                const emailTemplate = getRejectionEmailTemplate({
+                    firstName: user.firstName || '',
+                    lastName: user.lastName || '',
+                    adminNotes: adminNotes || null,
+                    lang,
+                })
+                
+                await sendEmail({
+                    to: user.email,
+                    subject: emailTemplate.subject,
+                    html: emailTemplate.html,
+                })
+                
+                console.log('Rejection email sent to:', user.email)
+            }
+        } catch (emailError) {
+            console.error('Error sending email:', emailError)
+            // Don't fail the request if email fails
+            // The application status was still updated successfully
+        }
 
         return NextResponse.json({
             success: true,
