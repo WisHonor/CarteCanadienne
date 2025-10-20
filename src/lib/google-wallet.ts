@@ -16,94 +16,50 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
     const privateKey = process.env.GOOGLE_WALLET_PRIVATE_KEY?.replace(/\\n/g, '\n')
 
     if (!issuerId || !classId || !serviceAccountEmail || !privateKey) {
+        console.error('Missing Google Wallet environment variables:', {
+            hasIssuerId: !!issuerId,
+            hasClassId: !!classId,
+            hasEmail: !!serviceAccountEmail,
+            hasKey: !!privateKey
+        })
         throw new Error('Missing Google Wallet environment variables')
     }
 
-    const objectId = `${issuerId}.${cardDetails.cardNumber.replace(/-/g, '_')}`
+    // Clean up the card number for use in ID (remove special characters)
+    const cleanCardNumber = cardDetails.cardNumber.replace(/[^a-zA-Z0-9]/g, '_')
+    const objectId = `${issuerId}.${cleanCardNumber}`
     const fullClassId = `${issuerId}.${classId}`
 
-    // Create the generic class (this will be created if it doesn't exist)
+    // Simple generic class definition
     const genericClass = {
-        id: fullClassId,
-        classTemplateInfo: {
-            cardTemplateOverride: {
-                cardRowTemplateInfos: [
-                    {
-                        oneItem: {
-                            item: {
-                                firstValue: {
-                                    fields: [
-                                        {
-                                            fieldPath: "object.textModulesData['card_number']"
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    {
-                        oneItem: {
-                            item: {
-                                firstValue: {
-                                    fields: [
-                                        {
-                                            fieldPath: "object.textModulesData['date_of_birth']"
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    {
-                        oneItem: {
-                            item: {
-                                firstValue: {
-                                    fields: [
-                                        {
-                                            fieldPath: "object.textModulesData['province']"
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                ]
-            }
-        }
+        id: fullClassId
     }
 
-    // Create the pass object
+    // Create the pass object with simplified structure
     const genericObject = {
         id: objectId,
         classId: fullClassId,
-        genericType: 'GENERIC_TYPE_UNSPECIFIED',
         hexBackgroundColor: '#1e40af',
         logo: {
             sourceUri: {
-                uri: 'https://carte-canadienne.vercel.app/canada-logo.png'
-            },
-            contentDescription: {
-                defaultValue: {
-                    language: 'fr-CA',
-                    value: 'Logo du Canada'
-                }
+                uri: 'https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/pass_google_logo.jpg'
             }
         },
         cardTitle: {
             defaultValue: {
-                language: 'fr-CA',
+                language: 'fr',
                 value: 'Carte Canadienne du Handicap'
             }
         },
         subheader: {
             defaultValue: {
-                language: 'fr-CA',
+                language: 'fr',
                 value: 'Gouvernement du Canada'
             }
         },
         header: {
             defaultValue: {
-                language: 'fr-CA',
+                language: 'fr',
                 value: `${cardDetails.firstName} ${cardDetails.lastName}`
             }
         },
@@ -126,24 +82,31 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
         ]
     }
 
-    // Create the JWT payload with both class and object
-    const payload = {
+    // Create the JWT payload
+    const claims = {
         iss: serviceAccountEmail,
         aud: 'google',
         typ: 'savetowallet',
         iat: Math.floor(Date.now() / 1000),
-        origins: ['https://carte-canadienne.vercel.app'],
+        origins: [],
         payload: {
             genericClasses: [genericClass],
             genericObjects: [genericObject]
         }
     }
 
-    // Sign the JWT
-    const token = jwt.sign(payload, privateKey, { algorithm: 'RS256' })
-
-    // Return the save URL
-    return `https://pay.google.com/gp/v/save/${token}`
+    try {
+        // Sign the JWT
+        const token = jwt.sign(claims, privateKey, { algorithm: 'RS256' })
+        
+        console.log('Generated Google Wallet JWT token')
+        
+        // Return the save URL
+        return `https://pay.google.com/gp/v/save/${token}`
+    } catch (error) {
+        console.error('Error signing JWT:', error)
+        throw error
+    }
 }
 
 export function generateCardNumber(): string {
