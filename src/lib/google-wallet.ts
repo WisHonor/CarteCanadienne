@@ -19,17 +19,74 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
         throw new Error('Missing Google Wallet environment variables')
     }
 
-    const objectId = `${issuerId}.${cardDetails.cardNumber}`
+    const objectId = `${issuerId}.${cardDetails.cardNumber.replace(/-/g, '_')}`
+    const fullClassId = `${issuerId}.${classId}`
+
+    // Create the generic class (this will be created if it doesn't exist)
+    const genericClass = {
+        id: fullClassId,
+        classTemplateInfo: {
+            cardTemplateOverride: {
+                cardRowTemplateInfos: [
+                    {
+                        oneItem: {
+                            item: {
+                                firstValue: {
+                                    fields: [
+                                        {
+                                            fieldPath: "object.textModulesData['card_number']"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        oneItem: {
+                            item: {
+                                firstValue: {
+                                    fields: [
+                                        {
+                                            fieldPath: "object.textModulesData['date_of_birth']"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        oneItem: {
+                            item: {
+                                firstValue: {
+                                    fields: [
+                                        {
+                                            fieldPath: "object.textModulesData['province']"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
 
     // Create the pass object
     const genericObject = {
         id: objectId,
-        classId: `${issuerId}.${classId}`,
+        classId: fullClassId,
         genericType: 'GENERIC_TYPE_UNSPECIFIED',
         hexBackgroundColor: '#1e40af',
         logo: {
             sourceUri: {
                 uri: 'https://carte-canadienne.vercel.app/canada-logo.png'
+            },
+            contentDescription: {
+                defaultValue: {
+                    language: 'fr-CA',
+                    value: 'Logo du Canada'
+                }
             }
         },
         cardTitle: {
@@ -65,24 +122,11 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
                 id: 'province',
                 header: 'Province',
                 body: cardDetails.province
-            },
-            {
-                id: 'expiry',
-                header: 'Date d\'expiration',
-                body: cardDetails.expiryDate
             }
-        ],
-        validTimeInterval: {
-            start: {
-                date: new Date().toISOString()
-            },
-            end: {
-                date: cardDetails.expiryDate
-            }
-        }
+        ]
     }
 
-    // Create the JWT payload
+    // Create the JWT payload with both class and object
     const payload = {
         iss: serviceAccountEmail,
         aud: 'google',
@@ -90,6 +134,7 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
         iat: Math.floor(Date.now() / 1000),
         origins: ['https://carte-canadienne.vercel.app'],
         payload: {
+            genericClasses: [genericClass],
             genericObjects: [genericObject]
         }
     }

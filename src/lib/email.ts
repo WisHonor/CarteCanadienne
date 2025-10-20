@@ -88,13 +88,6 @@ export function getApprovalEmailTemplate(params: {
         </div>
         ` : ''}
         
-        <div style="text-align: center; margin: 40px 0;">
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/application/check-status" 
-               style="background: #1e40af; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
-                Voir ma demande
-            </a>
-        </div>
-        
         <p style="font-size: 14px; color: #64748b; margin-top: 30px;">
             Si vous avez des questions, n'hésitez pas à nous contacter au <strong>1-800-123-4567</strong> ou par courriel.
         </p>
@@ -163,13 +156,6 @@ export function getApprovalEmailTemplate(params: {
             </a>
         </div>
         ` : ''}
-        
-        <div style="text-align: center; margin: 40px 0;">
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/application/check-status" 
-               style="background: #1e40af; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
-                View My Application
-            </a>
-        </div>
         
         <p style="font-size: 14px; color: #64748b; margin-top: 30px;">
             If you have any questions, please contact us at <strong>1-800-123-4567</strong> or by email.

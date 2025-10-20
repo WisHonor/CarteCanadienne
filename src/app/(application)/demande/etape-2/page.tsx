@@ -24,7 +24,6 @@ const messages = {
         legendSvc: 'Services et accommodements demandés',
         otherLabel: 'Autre (précisez)',
         detailsLabel: 'Détails additionnels (optionnel)',
-        docsLabel: 'Joindre un document d’appui (optionnel)',
 
         // groups
         disA11yHint:
@@ -61,7 +60,6 @@ const messages = {
         legendSvc: 'Requested services & accommodations',
         otherLabel: 'Other (please specify)',
         detailsLabel: 'Additional details (optional)',
-        docsLabel: 'Attach supporting document (optional)',
 
         disA11yHint:
             'You may select multiple categories as needed.',
@@ -328,7 +326,7 @@ export default function Etape2() {
                                         </div>
                                     </fieldset>
 
-                                    {/* Additional details + optional doc */}
+                                    {/* Additional details */}
                                     <div className="grid gap-6 sm:grid-cols-2">
                                         <div className="sm:col-span-2">
                                             <label htmlFor="field-details" className="block text-sm font-medium text-slate-900">
@@ -340,21 +338,6 @@ export default function Etape2() {
                                                 value={data.details}
                                                 onChange={(e) => setData(d => ({ ...d, details: e.target.value }))}
                                                 className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2 focus:ring-blue-600 focus:border-blue-600"
-                                            />
-                                        </div>
-
-                                        <div className="sm:col-span-2">
-                                            <label htmlFor="field-doc" className="block text-sm font-medium text-slate-900">
-                                                {t('docsLabel')}
-                                            </label>
-                                            <input
-                                                id="field-doc"
-                                                type="file"
-                                                accept=".pdf,image/*"
-                                                onChange={(e) =>
-                                                    setData(d => ({ ...d, doc: e.target.files?.[0] || null }))
-                                                }
-                                                className="mt-2 block w-full text-slate-700"
                                             />
                                         </div>
                                     </div>
