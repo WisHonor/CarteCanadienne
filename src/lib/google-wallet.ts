@@ -36,7 +36,14 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
         id: fullClassId
     }
 
-    // Create the pass object with simplified structure
+    // Format expiry date properly
+    const expiryDateFormatted = new Date(cardDetails.expiryDate).toLocaleDateString('fr-CA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    })
+
+    // Create the pass object with better layout
     const genericObject = {
         id: objectId,
         classId: fullClassId,
@@ -49,7 +56,7 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
         cardTitle: {
             defaultValue: {
                 language: 'fr',
-                value: 'Carte Canadienne du Handicap'
+                value: 'Carte d\'Accessibilité'
             }
         },
         subheader: {
@@ -64,27 +71,51 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
                 value: `${cardDetails.firstName} ${cardDetails.lastName}`
             }
         },
+        // Hero image for better visual
+        heroImage: {
+            sourceUri: {
+                uri: 'https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/pass_google_logo.jpg'
+            }
+        },
+        // Text modules for cleaner display
         textModulesData: [
             {
-                id: 'card_id',
-                header: 'ID de la carte',
+                id: 'card_number',
+                header: 'Numéro de carte',
                 body: cardDetails.cardNumber
             },
             {
-                id: 'expiry_date',
-                header: 'Date d\'expiration',
-                body: new Date(cardDetails.expiryDate).toLocaleDateString('fr-CA', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                })
+                id: 'expiry',
+                header: 'Valide jusqu\'au',
+                body: expiryDateFormatted
             },
             ...(cardDetails.services && cardDetails.services.length > 0 ? [{
                 id: 'services',
-                header: 'Services autorisés',
-                body: cardDetails.services.join(', ')
+                header: 'Services disponibles',
+                body: cardDetails.services.join('\n• ')
             }] : [])
-        ]
+        ],
+        // Add info module rows for better organization
+        infoModuleData: {
+            labelValueRows: [
+                {
+                    columns: [
+                        {
+                            label: 'N° Carte',
+                            value: cardDetails.cardNumber
+                        }
+                    ]
+                },
+                {
+                    columns: [
+                        {
+                            label: 'Expiration',
+                            value: expiryDateFormatted
+                        }
+                    ]
+                }
+            ]
+        }
     }
 
     // Create the JWT payload
