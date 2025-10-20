@@ -88,16 +88,20 @@ export async function POST(req: NextRequest) {
                         const cardNumber = generateCardNumber()
                         const expiryDate = formatExpiryDate(5) // 5 years expiry
                         
+                        // Parse services from the application
+                        const services = application.services ? application.services.split(',').map(s => s.trim()) : []
+                        
                         walletUrl = generateGoogleWalletJWT({
                             cardNumber,
                             firstName: fullUser.firstName || '',
                             lastName: fullUser.lastName || '',
                             dateOfBirth: fullUser.dateOfBirth.toISOString().split('T')[0],
                             expiryDate,
-                            province: fullUser.province || 'QC'
+                            province: fullUser.province || 'QC',
+                            services
                         })
 
-                        console.log('Generated Google Wallet URL')
+                        console.log('Generated Google Wallet URL with services:', services)
                     }
                 } catch (walletError) {
                     console.error('Error generating Google Wallet URL:', walletError)

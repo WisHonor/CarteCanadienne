@@ -7,6 +7,7 @@ interface CardDetails {
     dateOfBirth: string
     expiryDate: string
     province: string
+    services?: string[] // Array of service names
 }
 
 export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
@@ -65,20 +66,24 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
         },
         textModulesData: [
             {
-                id: 'card_number',
-                header: 'Numéro de carte',
+                id: 'card_id',
+                header: 'ID de la carte',
                 body: cardDetails.cardNumber
             },
             {
-                id: 'date_of_birth',
-                header: 'Date de naissance',
-                body: cardDetails.dateOfBirth
+                id: 'expiry_date',
+                header: 'Date d\'expiration',
+                body: new Date(cardDetails.expiryDate).toLocaleDateString('fr-CA', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                })
             },
-            {
-                id: 'province',
-                header: 'Province',
-                body: cardDetails.province
-            }
+            ...(cardDetails.services && cardDetails.services.length > 0 ? [{
+                id: 'services',
+                header: 'Services autorisés',
+                body: cardDetails.services.join(', ')
+            }] : [])
         ]
     }
 

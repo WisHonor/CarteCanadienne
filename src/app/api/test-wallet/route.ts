@@ -10,7 +10,8 @@ export async function GET() {
             lastName: 'Dupont',
             dateOfBirth: '1990-01-15',
             expiryDate: formatExpiryDate(5),
-            province: 'QC'
+            province: 'QC',
+            services: ['Stationnement accessible', 'Tarif accompagnateur', 'Transport prioritaire']
         }
 
         const walletUrl = generateGoogleWalletJWT(testCardDetails)
