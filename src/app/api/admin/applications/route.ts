@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@/generated/prisma'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/db'
 
 export async function GET(req: NextRequest) {
     try {
@@ -38,7 +36,7 @@ export async function GET(req: NextRequest) {
             },
         })
 
-        const formattedApplications = applications.map(app => ({
+        const formattedApplications = applications.map((app: typeof applications[0]) => ({
             id: app.id,
             status: app.status,
             createdAt: app.createdAt,

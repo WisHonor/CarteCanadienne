@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@/generated/prisma'
+import prisma from '@/lib/db'
 import crypto from 'crypto'
-
-const prisma = new PrismaClient()
 
 // Simple password hashing (in production, use bcrypt)
 function hashPassword(password: string): string {
