@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
                     }
 
                     // Create the Google Wallet pass
-                    walletLink = await createWalletPass({
+                    const googleWalletLink = await createWalletPass({
                         userId: application.id,
                         fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
                         email: user.email,
@@ -119,7 +119,17 @@ export async function POST(req: NextRequest) {
                         services,
                     });
 
-                    console.log('✅ Google Wallet pass created successfully:', walletLink);
+                    // Extract the JWT token from Google Wallet URL and create redirect URL
+                    const tokenMatch = googleWalletLink.match(/\/save\/(.+)$/);
+                    if (tokenMatch) {
+                        // Use redirect URL through our domain to avoid spam filters
+                        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+                        walletLink = `${appUrl}/api/wallet/redirect?token=${tokenMatch[1]}`;
+                        console.log('✅ Google Wallet pass created with redirect URL');
+                    } else {
+                        walletLink = googleWalletLink;
+                        console.log('✅ Google Wallet pass created (direct URL)');
+                    }
                 } catch (walletError) {
                     console.error('❌ ERROR: Failed to create Google Wallet pass:', walletError);
                     console.error('📧 Email will be sent WITHOUT wallet link');
