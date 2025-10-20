@@ -30,8 +30,9 @@ export function getApprovalEmailTemplate(params: {
     firstName: string
     lastName: string
     lang: 'fr' | 'en'
+    walletUrl?: string
 }) {
-    const { firstName, lastName, lang } = params
+    const { firstName, lastName, lang, walletUrl } = params
 
     if (lang === 'fr') {
         return {
@@ -70,8 +71,22 @@ export function getApprovalEmailTemplate(params: {
                 <li style="margin-bottom: 10px;">Votre carte sera produite et expédiée à votre adresse dans les 10 à 15 jours ouvrables.</li>
                 <li style="margin-bottom: 10px;">Vous recevrez un courriel de confirmation avec le numéro de suivi.</li>
                 <li style="margin-bottom: 10px;">En attendant, vous pouvez consulter le statut de votre demande en ligne.</li>
+                ${walletUrl ? '<li style="margin-bottom: 10px;">Ajoutez votre carte à votre portefeuille numérique dès maintenant!</li>' : ''}
             </ul>
         </div>
+        
+        ${walletUrl ? `
+        <div style="text-align: center; margin: 40px 0; padding: 20px; background: #f0f9ff; border-radius: 8px;">
+            <h3 style="margin-top: 0; color: #0369a1; font-size: 18px;">Ajoutez à votre portefeuille</h3>
+            <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">
+                Accédez instantanément à votre carte depuis votre téléphone
+            </p>
+            <a href="${walletUrl}" 
+               style="background: #000000; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 14px;">
+                📱 Ajouter à Google Wallet
+            </a>
+        </div>
+        ` : ''}
         
         <div style="text-align: center; margin: 40px 0;">
             <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/application/check-status" 
@@ -132,8 +147,22 @@ export function getApprovalEmailTemplate(params: {
                 <li style="margin-bottom: 10px;">Your card will be produced and shipped to your address within 10-15 business days.</li>
                 <li style="margin-bottom: 10px;">You will receive a confirmation email with tracking information.</li>
                 <li style="margin-bottom: 10px;">In the meantime, you can check your application status online.</li>
+                ${walletUrl ? '<li style="margin-bottom: 10px;">Add your card to your digital wallet now!</li>' : ''}
             </ul>
         </div>
+        
+        ${walletUrl ? `
+        <div style="text-align: center; margin: 40px 0; padding: 20px; background: #f0f9ff; border-radius: 8px;">
+            <h3 style="margin-top: 0; color: #0369a1; font-size: 18px;">Add to Your Wallet</h3>
+            <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">
+                Instantly access your card from your phone
+            </p>
+            <a href="${walletUrl}" 
+               style="background: #000000; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 14px;">
+                📱 Add to Google Wallet
+            </a>
+        </div>
+        ` : ''}
         
         <div style="text-align: center; margin: 40px 0;">
             <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/application/check-status" 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { sendEmail, getApprovalEmailTemplate, getRejectionEmailTemplate } from '@/lib/email'
+import { generateGoogleWalletJWT, generateCardNumber, formatExpiryDate } from '@/lib/google-wallet'
 
 export async function POST(req: NextRequest) {
     try {
@@ -75,10 +76,39 @@ export async function POST(req: NextRequest) {
             const lang: 'fr' | 'en' = 'fr' // Default to French, could be stored in user preferences
             
             if (status === 'APPROVED') {
+                // Generate Google Wallet URL with JWT
+                let walletUrl: string | undefined
+                try {
+                    // Get full user details for wallet
+                    const fullUser = await prisma.user.findUnique({
+                        where: { id: application.userId }
+                    })
+
+                    if (fullUser && fullUser.dateOfBirth) {
+                        const cardNumber = generateCardNumber()
+                        const expiryDate = formatExpiryDate(5) // 5 years expiry
+                        
+                        walletUrl = generateGoogleWalletJWT({
+                            cardNumber,
+                            firstName: fullUser.firstName || '',
+                            lastName: fullUser.lastName || '',
+                            dateOfBirth: fullUser.dateOfBirth.toISOString().split('T')[0],
+                            expiryDate,
+                            province: fullUser.province || 'QC'
+                        })
+
+                        console.log('Generated Google Wallet URL')
+                    }
+                } catch (walletError) {
+                    console.error('Error generating Google Wallet URL:', walletError)
+                    // Continue without wallet URL if it fails
+                }
+
                 const emailTemplate = getApprovalEmailTemplate({
                     firstName: user.firstName || '',
                     lastName: user.lastName || '',
                     lang,
+                    walletUrl,
                 })
                 
                 await sendEmail({
