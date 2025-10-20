@@ -342,21 +342,6 @@ export default function Etape2() {
                                                 className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2 focus:ring-blue-600 focus:border-blue-600"
                                             />
                                         </div>
-
-                                        <div className="sm:col-span-2">
-                                            <label htmlFor="field-doc" className="block text-sm font-medium text-slate-900">
-                                                {t('docsLabel')}
-                                            </label>
-                                            <input
-                                                id="field-doc"
-                                                type="file"
-                                                accept=".pdf,image/*"
-                                                onChange={(e) =>
-                                                    setData(d => ({ ...d, doc: e.target.files?.[0] || null }))
-                                                }
-                                                className="mt-2 block w-full text-slate-700"
-                                            />
-                                        </div>
                                     </div>
 
                                     {/* Actions */}

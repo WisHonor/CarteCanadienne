@@ -29,9 +29,10 @@ export async function sendEmail({ to, subject, html }: EmailParams) {
 export function getApprovalEmailTemplate(params: {
     firstName: string
     lastName: string
+    walletLink?: string
     lang: 'fr' | 'en'
 }) {
-    const { firstName, lastName, lang } = params
+    const { firstName, lastName, walletLink, lang } = params
 
     if (lang === 'fr') {
         return {
@@ -73,12 +74,21 @@ export function getApprovalEmailTemplate(params: {
             </ul>
         </div>
         
-        <div style="text-align: center; margin: 40px 0;">
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/application/check-status" 
-               style="background: #1e40af; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
-                Voir ma demande
+        ${walletLink ? `
+        <div style="background: #f0f9ff; border: 2px solid #3b82f6; padding: 25px; margin: 30px 0; border-radius: 10px; text-align: center;">
+            <h3 style="margin-top: 0; color: #1e40af; font-size: 20px;">📱 Ajoutez votre carte à Google Wallet</h3>
+            <p style="font-size: 14px; color: #475569; margin-bottom: 20px;">
+                Accédez instantanément à votre Carte d'Accessibilité sur votre téléphone!
+            </p>
+            <a href="${walletLink}" 
+               style="background: #1e40af; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px; margin-bottom: 15px;">
+                🎫 Ajouter à Google Wallet
             </a>
+            <p style="font-size: 12px; color: #64748b; margin: 0;">
+                Votre carte numérique inclut un code QR avec vos informations d'accès aux services.
+            </p>
         </div>
+        ` : ''}
         
         <p style="font-size: 14px; color: #64748b; margin-top: 30px;">
             Si vous avez des questions, n'hésitez pas à nous contacter au <strong>1-800-123-4567</strong> ou par courriel.
@@ -135,12 +145,21 @@ export function getApprovalEmailTemplate(params: {
             </ul>
         </div>
         
-        <div style="text-align: center; margin: 40px 0;">
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/application/check-status" 
-               style="background: #1e40af; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
-                View My Application
+        ${walletLink ? `
+        <div style="background: #f0f9ff; border: 2px solid #3b82f6; padding: 25px; margin: 30px 0; border-radius: 10px; text-align: center;">
+            <h3 style="margin-top: 0; color: #1e40af; font-size: 20px;">📱 Add Your Card to Google Wallet</h3>
+            <p style="font-size: 14px; color: #475569; margin-bottom: 20px;">
+                Get instant access to your Accessibility Card on your phone!
+            </p>
+            <a href="${walletLink}" 
+               style="background: #1e40af; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px; margin-bottom: 15px;">
+                🎫 Add to Google Wallet
             </a>
+            <p style="font-size: 12px; color: #64748b; margin: 0;">
+                Your digital card includes a QR code with your service access information.
+            </p>
         </div>
+        ` : ''}
         
         <p style="font-size: 14px; color: #64748b; margin-top: 30px;">
             If you have any questions, please contact us at <strong>1-800-123-4567</strong> or by email.

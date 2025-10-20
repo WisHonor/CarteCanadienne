@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@/generated/prisma'
 import { sendEmail, getApprovalEmailTemplate, getRejectionEmailTemplate } from '@/lib/email'
+import { createWalletPass, createOrUpdatePassClass } from '@/lib/googleWallet'
 
 const prisma = new PrismaClient()
 
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
                         email: true,
                         firstName: true,
                         lastName: true,
+                        dateOfBirth: true,
                     },
                 },
             },
@@ -77,9 +79,58 @@ export async function POST(req: NextRequest) {
             const lang: 'fr' | 'en' = 'fr' // Default to French, could be stored in user preferences
             
             if (status === 'APPROVED') {
+                // Generate Google Wallet pass link
+                let walletLink = '';
+                try {
+                    // Ensure the pass class exists
+                    await createOrUpdatePassClass();
+
+                    // Calculate expiration date (5 years from approval)
+                    const expirationDate = new Date();
+                    expirationDate.setFullYear(expirationDate.getFullYear() + 5);
+
+                    // Parse services from the application (stored as JSON string)
+                    let services = {
+                        mobilityAid: false,
+                        supportPerson: false,
+                        serviceAnimal: false,
+                    };
+                    
+                    if (application.services) {
+                        try {
+                            const parsedServices = JSON.parse(application.services);
+                            services = {
+                                mobilityAid: parsedServices.mobilityAid === 'yes' || parsedServices.mobilityAid === true,
+                                supportPerson: parsedServices.supportPerson === 'yes' || parsedServices.supportPerson === true,
+                                serviceAnimal: parsedServices.serviceAnimal === 'yes' || parsedServices.serviceAnimal === true,
+                            };
+                        } catch (parseError) {
+                            console.error('Error parsing services:', parseError);
+                        }
+                    }
+
+                    // Create the Google Wallet pass
+                    walletLink = await createWalletPass({
+                        userId: application.id,
+                        fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+                        email: user.email,
+                        dateOfBirth: user.dateOfBirth?.toISOString() || '',
+                        expirationDate: expirationDate.toISOString(),
+                        services,
+                    });
+
+                    console.log('✅ Google Wallet pass created successfully:', walletLink);
+                } catch (walletError) {
+                    console.error('❌ ERROR: Failed to create Google Wallet pass:', walletError);
+                    console.error('📧 Email will be sent WITHOUT wallet link');
+                    console.error('💡 To fix: Grant service account permissions - see FIX_PERMISSIONS.md');
+                    // Continue with email even if wallet creation fails
+                }
+
                 const emailTemplate = getApprovalEmailTemplate({
                     firstName: user.firstName || '',
                     lastName: user.lastName || '',
+                    walletLink, // Pass the wallet link to the email template
                     lang,
                 })
                 
