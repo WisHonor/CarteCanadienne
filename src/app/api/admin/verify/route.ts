@@ -88,8 +88,14 @@ export async function POST(req: NextRequest) {
                         const cardNumber = generateCardNumber()
                         const expiryDate = formatExpiryDate(5) // 5 years expiry
                         
-                        // Parse services from the application
-                        const services = application.services ? application.services.split(',').map(s => s.trim()) : []
+                        // Parse services from the application (stored as JSON string)
+                        let services: string[] = []
+                        try {
+                            services = application.services ? JSON.parse(application.services) : []
+                        } catch (e) {
+                            console.error('Error parsing services:', e)
+                            services = []
+                        }
                         
                         walletUrl = generateGoogleWalletJWT({
                             cardNumber,

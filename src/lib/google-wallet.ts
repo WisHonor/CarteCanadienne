@@ -43,14 +43,14 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
         day: 'numeric'
     })
 
-    // Create the pass object with better layout
+    // Create the pass object with card info visible upfront
     const genericObject = {
         id: objectId,
         classId: fullClassId,
         hexBackgroundColor: '#1e40af',
         logo: {
             sourceUri: {
-                uri: 'https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/pass_google_logo.jpg'
+                uri: `${process.env.NEXT_PUBLIC_APP_URL}/carte-logo.png`
             }
         },
         cardTitle: {
@@ -74,13 +74,13 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
         // Hero image for better visual
         heroImage: {
             sourceUri: {
-                uri: 'https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/pass_google_logo.jpg'
+                uri: `${process.env.NEXT_PUBLIC_APP_URL}/carte-hero.png`
             }
         },
-        // Text modules for cleaner display
+        // Text modules - card details and services visible upfront
         textModulesData: [
             {
-                id: 'card_number',
+                id: 'card_info',
                 header: 'Numéro de carte',
                 body: cardDetails.cardNumber
             },
@@ -92,30 +92,9 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
             ...(cardDetails.services && cardDetails.services.length > 0 ? [{
                 id: 'services',
                 header: 'Services disponibles',
-                body: cardDetails.services.join('\n• ')
+                body: '• ' + cardDetails.services.join('\n• ')
             }] : [])
-        ],
-        // Add info module rows for better organization
-        infoModuleData: {
-            labelValueRows: [
-                {
-                    columns: [
-                        {
-                            label: 'N° Carte',
-                            value: cardDetails.cardNumber
-                        }
-                    ]
-                },
-                {
-                    columns: [
-                        {
-                            label: 'Expiration',
-                            value: expiryDateFormatted
-                        }
-                    ]
-                }
-            ]
-        }
+        ]
     }
 
     // Create the JWT payload

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { generateGoogleWalletJWT, generateCardNumber, formatExpiryDate } from '@/lib/google-wallet'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
     try {
         // Test with dummy data

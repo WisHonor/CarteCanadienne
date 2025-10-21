@@ -1,6 +1,7 @@
-import { Resend } from 'resend'
+import sgMail from '@sendgrid/mail'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialize SendGrid with API key
+sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
 interface EmailParams {
     to: string
@@ -9,18 +10,32 @@ interface EmailParams {
 }
 
 export async function sendEmail({ to, subject, html }: EmailParams) {
+    const fromAddress = process.env.SENDGRID_FROM || 'Carte Canadienne <elmasry.wissam@gmail.com>'
+    
     try {
-        const data = await resend.emails.send({
-            from: 'Carte Canadienne <onboarding@resend.dev>', // Change this to your verified domain
-            to: [to],
+        console.log('📧 Sending email to:', to)
+        console.log('📤 From:', fromAddress)
+        
+        const msg = {
+            to,
+            from: fromAddress,
             subject,
             html,
-        })
+        }
 
-        console.log('Email sent successfully:', data)
-        return { success: true, data }
-    } catch (error) {
-        console.error('Error sending email:', error)
+        const response = await sgMail.send(msg)
+        
+        console.log('✅ Email sent successfully via SendGrid!')
+        console.log('Response status:', response[0].statusCode)
+        
+        return { success: true, data: response }
+    } catch (error: any) {
+        console.error('❌ Error sending email:', error)
+        
+        if (error.response) {
+            console.error('SendGrid error:', error.response.body)
+        }
+        
         return { success: false, error }
     }
 }
@@ -53,8 +68,8 @@ export function getApprovalEmailTemplate(params: {
     
     <div style="background: #ffffff; padding: 40px; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <div style="background: #10b981; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-                <span style="color: white; font-size: 48px;">✓</span>
+            <div style="background: #10b981; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: inline-flex; align-items: center; justify-content: center; line-height: 80px;">
+                <span style="color: white; font-size: 48px; display: inline-block; line-height: 1; vertical-align: middle;">✓</span>
             </div>
             <h2 style="color: #059669; margin: 0; font-size: 24px;">Félicitations!</h2>
         </div>
@@ -122,8 +137,8 @@ export function getApprovalEmailTemplate(params: {
     
     <div style="background: #ffffff; padding: 40px; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <div style="background: #10b981; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-                <span style="color: white; font-size: 48px;">✓</span>
+            <div style="background: #10b981; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: inline-flex; align-items: center; justify-content: center; line-height: 80px;">
+                <span style="color: white; font-size: 48px; display: inline-block; line-height: 1; vertical-align: middle;">✓</span>
             </div>
             <h2 style="color: #059669; margin: 0; font-size: 24px;">Congratulations!</h2>
         </div>
@@ -202,8 +217,8 @@ export function getRejectionEmailTemplate(params: {
     
     <div style="background: #ffffff; padding: 40px; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <div style="background: #ef4444; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-                <span style="color: white; font-size: 48px;">✕</span>
+            <div style="background: #ef4444; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: inline-flex; align-items: center; justify-content: center; line-height: 80px;">
+                <span style="color: white; font-size: 48px; display: inline-block; line-height: 1; vertical-align: middle;">✕</span>
             </div>
             <h2 style="color: #dc2626; margin: 0; font-size: 24px;">Mise à jour de votre demande</h2>
         </div>
@@ -275,8 +290,8 @@ export function getRejectionEmailTemplate(params: {
     
     <div style="background: #ffffff; padding: 40px; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <div style="background: #ef4444; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-                <span style="color: white; font-size: 48px;">✕</span>
+            <div style="background: #ef4444; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: inline-flex; align-items: center; justify-content: center; line-height: 80px;">
+                <span style="color: white; font-size: 48px; display: inline-block; line-height: 1; vertical-align: middle;">✕</span>
             </div>
             <h2 style="color: #dc2626; margin: 0; font-size: 24px;">Application Update</h2>
         </div>
