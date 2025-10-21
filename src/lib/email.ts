@@ -225,9 +225,13 @@ export function getRejectionEmailTemplate(params: {
     
     <div style="background: #ffffff; padding: 40px; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <div style="background: #ef4444; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: inline-flex; align-items: center; justify-content: center; line-height: 80px;">
-                <span style="color: white; font-size: 48px; display: inline-block; line-height: 1; vertical-align: middle;">✕</span>
-            </div>
+            <table style="background: #ef4444; width: 80px; height: 80px; border-radius: 8px; margin: 0 auto 20px;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <span style="color: white; font-size: 48px; line-height: 1;">✕</span>
+                    </td>
+                </tr>
+            </table>
             <h2 style="color: #dc2626; margin: 0; font-size: 24px;">Mise à jour de votre demande</h2>
         </div>
         
@@ -298,9 +302,13 @@ export function getRejectionEmailTemplate(params: {
     
     <div style="background: #ffffff; padding: 40px; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <div style="background: #ef4444; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: inline-flex; align-items: center; justify-content: center; line-height: 80px;">
-                <span style="color: white; font-size: 48px; display: inline-block; line-height: 1; vertical-align: middle;">✕</span>
-            </div>
+            <table style="background: #ef4444; width: 80px; height: 80px; border-radius: 8px; margin: 0 auto 20px;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <span style="color: white; font-size: 48px; line-height: 1;">✕</span>
+                    </td>
+                </tr>
+            </table>
             <h2 style="color: #dc2626; margin: 0; font-size: 24px;">Application Update</h2>
         </div>
         
