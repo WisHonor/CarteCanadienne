@@ -227,7 +227,7 @@ export default function Etape2() {
                         </button>
                     </div>
 
-                    {/* Title + breadcrumb (non-navigating) */}
+                    {/* Title + breadcrumb */}
                     <div className="py-8">
                         <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight">{t('h1')}</h1>
                         <nav aria-label={lang === 'fr' ? "Fil d'Ariane" : 'Breadcrumb'} className="mt-4">
