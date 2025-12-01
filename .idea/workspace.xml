@@ -5,28 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="85323536-4d7d-4a68-b5f4-7ffcb0d10eb9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ADMIN_AUTHENTICATION.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ADMIN_IMPLEMENTATION_SUMMARY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/AWS_S3_CONFIGURATION.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUSTOM_UI_COMPONENTS.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CUSTOM_UI_VISUAL_GUIDE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DOCUMENT_ACCESS_COMPARISON.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DOCUMENT_UPLOAD_FEATURE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/EMAIL_NOTIFICATION_SYSTEM.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/EMAIL_TESTING_GUIDE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FULL_EDIT_SYSTEM.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/MIGRATION_SUMMARY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PRESIGNED_URLS_COMPLETE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/QUICK_REFERENCE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/USER_VIEW_EDIT_SYSTEM.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(application)/demande/etape-2/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(application)/demande/etape-2/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/admin/verification/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/admin/verification/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/verify/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/verify/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/application/view/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/application/view/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/google-wallet.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/google-wallet.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,7 +111,7 @@
       <workItem from="1760312092140" duration="7699000" />
       <workItem from="1760362069647" duration="2623000" />
       <workItem from="1761577169867" duration="387000" />
-      <workItem from="1764601761220" duration="1704000" />
+      <workItem from="1764601761220" duration="2163000" />
     </task>
     <servers />
   </component>

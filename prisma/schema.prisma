@@ -12,7 +12,6 @@ model Application {
   userId                              String    @unique
   disabilities                        String?
   services                            String?
-  approvedServices                    String? // Services approved by admin (subset of services)
   otherText                           String?
   details                             String?
   createdAt                           DateTime  @default(now())
@@ -20,10 +19,11 @@ model Application {
   adminNotes                          String?
   handicapDocUrl                      String?
   identityDocUrl                      String?
-  medicalDocUrl                       String? // Added for medical documentation
   status                              String    @default("PENDING")
   verifiedAt                          DateTime?
   verifiedById                        String?
+  medicalDocUrl                       String?
+  approvedServices                    String?
   User_Application_userIdToUser       User      @relation("Application_userIdToUser", fields: [userId], references: [id])
   User_Application_verifiedByIdToUser User?     @relation("Application_verifiedByIdToUser", fields: [verifiedById], references: [id])
 
