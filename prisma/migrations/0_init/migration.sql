@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "Application" (
+CREATE TABLE IF NOT EXISTS "Application" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "disabilities" TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE "Application" (
 );
 
 -- CreateTable
-CREATE TABLE "User" (
+CREATE TABLE IF NOT EXISTS "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "firstName" TEXT,
@@ -40,18 +40,47 @@ CREATE TABLE "User" (
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "Application_userId_key" ON "Application"("userId");
+-- Add approvedServices column if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'Application' AND column_name = 'approvedServices'
+    ) THEN
+        ALTER TABLE "Application" ADD COLUMN "approvedServices" TEXT;
+    END IF;
+END $$;
 
 -- CreateIndex
-CREATE INDEX "Application_status_idx" ON "Application"("status");
+CREATE UNIQUE INDEX IF NOT EXISTS "Application_userId_key" ON "Application"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE INDEX IF NOT EXISTS "Application_status_idx" ON "Application"("status");
+
+-- CreateIndex
+CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");
 
 -- AddForeignKey
-ALTER TABLE "Application" ADD CONSTRAINT "Application_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE constraint_name = 'Application_userId_fkey'
+    ) THEN
+        ALTER TABLE "Application" ADD CONSTRAINT "Application_userId_fkey"
+        FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Application" ADD CONSTRAINT "Application_verifiedById_fkey" FOREIGN KEY ("verifiedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE constraint_name = 'Application_verifiedById_fkey'
+    ) THEN
+        ALTER TABLE "Application" ADD CONSTRAINT "Application_verifiedById_fkey"
+        FOREIGN KEY ("verifiedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
 
