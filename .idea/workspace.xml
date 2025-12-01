@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85323536-4d7d-4a68-b5f4-7ffcb0d10eb9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/prisma/schema.prisma" afterDir="false" />
-    </list>
+    <list default="true" id="85323536-4d7d-4a68-b5f4-7ffcb0d10eb9" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -111,7 +109,7 @@
       <workItem from="1760312092140" duration="7699000" />
       <workItem from="1760362069647" duration="2623000" />
       <workItem from="1761577169867" duration="387000" />
-      <workItem from="1764601761220" duration="2163000" />
+      <workItem from="1764601761220" duration="3062000" />
     </task>
     <servers />
   </component>

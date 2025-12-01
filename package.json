@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "prebuild": "node scripts/prebuild.js",
     "build": "prisma generate && prisma migrate deploy && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
