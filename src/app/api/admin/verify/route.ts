@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json()
-        const { applicationId, status, adminNotes } = body
+        const { applicationId, status, adminNotes, approvedServices } = body
 
-        console.log('Verifying application:', { applicationId, status, adminNotes })
+        console.log('Verifying application:', { applicationId, status, adminNotes, approvedServices })
 
         if (!applicationId || !status) {
             return NextResponse.json(
@@ -62,6 +62,9 @@ export async function POST(req: NextRequest) {
             data: {
                 status,
                 adminNotes: adminNotes || null,
+                approvedServices: status === 'APPROVED' && approvedServices
+                    ? JSON.stringify(approvedServices)
+                    : null,
                 verifiedAt: new Date(),
                 verifiedById: null, // Will be set to actual admin ID once auth is implemented
                 updatedAt: new Date(),
@@ -88,10 +91,13 @@ export async function POST(req: NextRequest) {
                         const cardNumber = generateCardNumber()
                         const expiryDate = formatExpiryDate(5) // 5 years expiry
                         
-                        // Parse services from the application (stored as JSON string)
+                        // Use approved services if available, otherwise use all requested services
                         let services: string[] = []
                         try {
-                            services = application.services ? JSON.parse(application.services) : []
+                            // If admin approved specific services, use those; otherwise use all requested services
+                            const servicesToUse = approvedServices ||
+                                (application.services ? JSON.parse(application.services) : [])
+                            services = Array.isArray(servicesToUse) ? servicesToUse : []
                         } catch (e) {
                             console.error('Error parsing services:', e)
                             services = []
@@ -104,10 +110,11 @@ export async function POST(req: NextRequest) {
                             dateOfBirth: fullUser.dateOfBirth.toISOString().split('T')[0],
                             expiryDate,
                             province: fullUser.province || 'QC',
-                            services
+                            services, // These are service keys that will be converted to labels
+                            lang // Pass language for proper label conversion
                         })
 
-                        console.log('Generated Google Wallet URL with services:', services)
+                        console.log('Generated Google Wallet URL with approved service keys:', services)
                     }
                 } catch (walletError) {
                     console.error('Error generating Google Wallet URL:', walletError)

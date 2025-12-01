@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import { getServiceLabels } from './service-labels'
 
 interface CardDetails {
     cardNumber: string
@@ -7,7 +8,8 @@ interface CardDetails {
     dateOfBirth: string
     expiryDate: string
     province: string
-    services?: string[] // Array of service names
+    services?: string[] // Array of service keys (will be converted to labels)
+    lang?: 'fr' | 'en' // Language for service labels
 }
 
 export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
@@ -47,7 +49,9 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
     const genericObject = {
         id: objectId,
         classId: fullClassId,
-        hexBackgroundColor: '#1e40af',
+        // WCAG AA compliant: Light blue background (#E8F2FF) provides excellent contrast
+        // with dark text (contrast ratio > 12:1 with #000000)
+        hexBackgroundColor: '#E8F2FF',
         logo: {
             sourceUri: {
                 uri: `${process.env.NEXT_PUBLIC_APP_URL}/carte-logo.png`
@@ -91,8 +95,11 @@ export function generateGoogleWalletJWT(cardDetails: CardDetails): string {
             },
             ...(cardDetails.services && cardDetails.services.length > 0 ? [{
                 id: 'services',
-                header: 'Services disponibles',
-                body: '• ' + cardDetails.services.join('\n• ')
+                header: cardDetails.lang === 'en' ? 'Available Services' : 'Services disponibles',
+                // Convert service keys to human-readable labels in the correct language
+                body: getServiceLabels(cardDetails.services, cardDetails.lang || 'fr')
+                    .map(label => `• ${label}`)
+                    .join('\n')
             }] : [])
         ]
     }

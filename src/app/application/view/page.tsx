@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { getServiceLabels, getDisabilityLabels } from '@/lib/service-labels'
 
 type Lang = 'fr' | 'en'
 
@@ -433,7 +434,7 @@ function ViewApplicationContent() {
                                             <div>
                                                 <p className="text-sm font-medium text-slate-600 uppercase tracking-wider mb-2">{t('disabilities')}</p>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {application.disabilities.map((disability, index) => (
+                                                    {getDisabilityLabels(application.disabilities, lang).map((disability, index) => (
                                                         <span
                                                             key={index}
                                                             className="px-3 py-1 bg-blue-100 text-blue-900 rounded-full text-sm font-medium"
@@ -449,7 +450,7 @@ function ViewApplicationContent() {
                                             <div>
                                                 <p className="text-sm font-medium text-slate-600 uppercase tracking-wider mb-2">{t('services')}</p>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {application.services.map((service, index) => (
+                                                    {getServiceLabels(application.services, lang).map((service, index) => (
                                                         <span
                                                             key={index}
                                                             className="px-3 py-1 bg-green-100 text-green-900 rounded-full text-sm font-medium"

@@ -12,6 +12,7 @@ model Application {
   userId                              String    @unique
   disabilities                        String?
   services                            String?
+  approvedServices                    String? // Services approved by admin (subset of services)
   otherText                           String?
   details                             String?
   createdAt                           DateTime  @default(now())

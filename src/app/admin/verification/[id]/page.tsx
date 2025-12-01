@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import ConfirmModal from '@/components/ConfirmModal'
 import Toast from '@/components/Toast'
+import { getServiceLabels, getDisabilityLabels } from '@/lib/service-labels'
 
 type Lang = 'fr' | 'en'
 
@@ -46,6 +47,10 @@ const translations = {
         adminActions: 'Actions administratives',
         adminNotes: 'Notes administratives (optionnel)',
         adminNotesPlaceholder: 'Ajouter des notes concernant cette décision...',
+        selectServices: 'Sélectionner les services à approuver',
+        selectServicesDesc: 'Cochez les services que vous souhaitez approuver pour ce demandeur',
+        approveAll: 'Approuver tous les services',
+        approveSelected: 'Approuver les services sélectionnés',
         approve: 'Approuver',
         reject: 'Rejeter',
         confirmApprove: 'Êtes-vous sûr de vouloir approuver cette demande?',
@@ -105,6 +110,10 @@ const translations = {
         adminActions: 'Admin Actions',
         adminNotes: 'Admin Notes (optional)',
         adminNotesPlaceholder: 'Add notes regarding this decision...',
+        selectServices: 'Select services to approve',
+        selectServicesDesc: 'Check the services you want to approve for this applicant',
+        approveAll: 'Approve all services',
+        approveSelected: 'Approve selected services',
         approve: 'Approve',
         reject: 'Reject',
         confirmApprove: 'Are you sure you want to approve this application?',
@@ -166,6 +175,7 @@ export default function AdminVerificationPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [adminNotes, setAdminNotes] = useState('')
+    const [selectedServices, setSelectedServices] = useState<string[]>([])
     const [submitting, setSubmitting] = useState(false)
     const [viewingDoc, setViewingDoc] = useState<{ identity: boolean; medical: boolean }>({
         identity: false,
@@ -237,6 +247,8 @@ export default function AdminVerificationPage() {
             const data = await response.json()
             setApplication(data)
             setAdminNotes(data.adminNotes || '')
+            // Initialize selected services with all requested services
+            setSelectedServices(data.services || [])
         } catch (err) {
             console.error('Error fetching application:', err)
             setError(t('error'))
@@ -270,11 +282,18 @@ export default function AdminVerificationPage() {
     const handleVerify = async (status: 'APPROVED' | 'REJECTED') => {
         setSubmitting(true)
         try {
-            console.log('Sending verification request:', {
+            const requestBody: any = {
                 applicationId,
                 status,
                 adminNotes: adminNotes.trim() || null,
-            })
+            }
+
+            // Include approved services only when approving
+            if (status === 'APPROVED') {
+                requestBody.approvedServices = selectedServices
+            }
+
+            console.log('Sending verification request:', requestBody)
 
             const token = sessionStorage.getItem('admin-token')
             const response = await fetch('/api/admin/verify', {
@@ -283,11 +302,7 @@ export default function AdminVerificationPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    applicationId,
-                    status,
-                    adminNotes: adminNotes.trim() || null,
-                }),
+                body: JSON.stringify(requestBody),
             })
 
             console.log('Response status:', response.status)
@@ -341,6 +356,26 @@ export default function AdminVerificationPage() {
             document.documentElement.lang = next
             return next
         })
+    }
+
+    const toggleService = (serviceKey: string) => {
+        setSelectedServices(prev => {
+            if (prev.includes(serviceKey)) {
+                return prev.filter(s => s !== serviceKey)
+            } else {
+                return [...prev, serviceKey]
+            }
+        })
+    }
+
+    const selectAllServices = () => {
+        if (application) {
+            setSelectedServices(application.services)
+        }
+    }
+
+    const deselectAllServices = () => {
+        setSelectedServices([])
     }
 
     const getStatusBadge = (status: string) => {
@@ -487,7 +522,7 @@ export default function AdminVerificationPage() {
                                             <div>
                                                 <p className="text-sm font-medium text-slate-600 uppercase tracking-wider mb-2">{t('disabilities')}</p>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {application.disabilities.map((disability, index) => (
+                                                    {getDisabilityLabels(application.disabilities, lang).map((disability, index) => (
                                                         <span
                                                             key={index}
                                                             className="px-3 py-1 bg-blue-100 text-blue-900 rounded-full text-sm font-medium"
@@ -503,7 +538,7 @@ export default function AdminVerificationPage() {
                                             <div>
                                                 <p className="text-sm font-medium text-slate-600 uppercase tracking-wider mb-2">{t('services')}</p>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {application.services.map((service, index) => (
+                                                    {getServiceLabels(application.services, lang).map((service, index) => (
                                                         <span
                                                             key={index}
                                                             className="px-3 py-1 bg-green-100 text-green-900 rounded-full text-sm font-medium"
@@ -590,6 +625,80 @@ export default function AdminVerificationPage() {
                                         <h3 className="text-lg font-semibold text-slate-900 mb-4">{t('adminActions')}</h3>
                                         
                                         <div className="space-y-4">
+                                            {/* Service Selection */}
+                                            {application.services.length > 0 && (
+                                                <div className="bg-white rounded-lg p-4 border-2 border-blue-200">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <label className="block text-sm font-semibold text-slate-900">
+                                                            {t('selectServices')}
+                                                        </label>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={selectAllServices}
+                                                                className="text-xs px-2 py-1 text-blue-700 hover:text-blue-900 hover:underline font-medium"
+                                                            >
+                                                                {t('approveAll')}
+                                                            </button>
+                                                            <span className="text-slate-400">|</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={deselectAllServices}
+                                                                className="text-xs px-2 py-1 text-slate-600 hover:text-slate-800 hover:underline font-medium"
+                                                            >
+                                                                {lang === 'fr' ? 'Désélectionner tout' : 'Deselect all'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-xs text-slate-600 mb-3">{t('selectServicesDesc')}</p>
+                                                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                                                        {application.services.map((serviceKey) => {
+                                                            const serviceLabel = getServiceLabels([serviceKey], lang)[0]
+                                                            const isSelected = selectedServices.includes(serviceKey)
+                                                            return (
+                                                                <label
+                                                                    key={serviceKey}
+                                                                    className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all ${
+                                                                        isSelected
+                                                                            ? 'bg-green-50 border-2 border-green-400'
+                                                                            : 'bg-slate-50 border-2 border-slate-200 hover:border-slate-300'
+                                                                    }`}
+                                                                >
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={isSelected}
+                                                                        onChange={() => toggleService(serviceKey)}
+                                                                        className="mt-0.5 h-5 w-5 text-green-600 rounded focus:ring-2 focus:ring-green-500 border-slate-300"
+                                                                    />
+                                                                    <span className={`text-sm font-medium flex-1 ${
+                                                                        isSelected ? 'text-green-900' : 'text-slate-700'
+                                                                    }`}>
+                                                                        {serviceLabel}
+                                                                    </span>
+                                                                    {isSelected && (
+                                                                        <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                        </svg>
+                                                                    )}
+                                                                </label>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                    <div className="mt-3 pt-3 border-t border-slate-200">
+                                                        <p className="text-xs text-slate-600">
+                                                            <span className="font-semibold text-slate-900">
+                                                                {selectedServices.length}
+                                                            </span>
+                                                            {lang === 'fr'
+                                                                ? ` service(s) sélectionné(s) sur ${application.services.length}`
+                                                                : ` service(s) selected out of ${application.services.length}`
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Admin Notes */}
                                             <div>
                                                 <label htmlFor="adminNotes" className="block text-sm font-medium text-slate-900 mb-2">
                                                     {t('adminNotes')}
@@ -604,16 +713,21 @@ export default function AdminVerificationPage() {
                                                 />
                                             </div>
 
+                                            {/* Action Buttons */}
                                             <div className="space-y-3">
                                                 <button
                                                     onClick={() => openConfirmModal('APPROVED')}
-                                                    disabled={submitting}
-                                                    className="w-full px-6 py-3.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors font-semibold text-lg shadow-sm flex items-center justify-center gap-2"
+                                                    disabled={submitting || selectedServices.length === 0}
+                                                    className="w-full px-6 py-3.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold text-lg shadow-sm flex items-center justify-center gap-2"
+                                                    title={selectedServices.length === 0 ? (lang === 'fr' ? 'Sélectionnez au moins un service' : 'Select at least one service') : ''}
                                                 >
                                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                     </svg>
-                                                    {t('approve')}
+                                                    {selectedServices.length === application.services.length
+                                                        ? t('approveAll')
+                                                        : t('approveSelected')
+                                                    }
                                                 </button>
 
                                                 <button
